@@ -1,0 +1,97 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.IO;
+using Telegram.Bot;
+using Telegram.Bot.Args;
+namespace ConsoleApp5
+{
+    class Program
+    {
+        string ss;
+        static TelegramBotClient Bot = new TelegramBotClient("5035406442:AAFgnIfqqTWnrkBZcMd0xSwXNlj817Id1_M");
+        static void Main(string[] args)
+        {
+            Bot.StartReceiving();
+            Bot.OnMessage += Bot_OnMessage;
+            Console.ReadLine();
+        }
+
+        private static void Bot_OnMessage(object sender, MessageEventArgs e)
+        {
+            if (e.Message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
+            {
+                if (e.Message.Text.StartsWith("/start"))
+                {
+                    try
+                   {
+                        string ss = "";
+      WebRequest student = HttpWebRequest.Create("https://newsapi.org/v2/everything?q="+e.Message.Text.Split(' ')[1].ToString()+"&from="+ DateTime.Today.ToString("yyyy-MM-dd") + "&sortBy=popularity&apiKey=1749a104071f4a0ea0143201ecb0b4e8");
+                    WebResponse response = student.GetResponse();
+                        StreamReader response1 = new StreamReader(response.GetResponseStream());
+                        string response2 = response1.ReadToEnd();
+                        news getnews = Newtonsoft.Json.JsonConvert.DeserializeObject<news>(response2);
+                        for (int i = 0; i < 5; i++)
+                        {
+                            ss = getnews.articles[i].title.ToString() + "\n" + getnews.articles[i].publishedAt.ToString() + "\n" + getnews.articles[i].url.ToString() + "\n";
+                            string response12 = ss;
+                            // response12 += e.Message.Text.ToString();
+                            Bot.SendTextMessageAsync(e.Message.Chat.Id, response12);
+                            
+                        }
+                        
+
+                    }
+                
+                   catch (Exception)
+                 {
+                        Bot.SendTextMessageAsync(e.Message.Chat.Id, "check your input");
+                  }
+
+                   
+                }
+                if (e.Message.Text.StartsWith("/help"))
+                {
+                    Bot.SendTextMessageAsync(e.Message.Chat.Id, "example /start USA OR /start ايران");
+                }
+            }
+
+                }
+            }
+
+
+    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
+    public class Source
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+    }
+
+    public class Article
+    {
+        public Source source { get; set; }
+        public object author { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public string url { get; set; }
+        public string urlToImage { get; set; }
+        public DateTime publishedAt { get; set; }
+        public string content { get; set; }
+    }
+
+    public class news
+    {
+        public string status { get; set; }
+        public int totalResults { get; set; }
+        public List<Article> articles { get; set; }
+    }
+
+
+
+
+
+
+}
